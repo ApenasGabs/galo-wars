@@ -1,7 +1,8 @@
-// Script de registro técnico do Galo Wars no Anytype
+// Script de atualização técnica do Galo Wars no Anytype
 const token = process.env.ANYTYPE_API_KEY || 'addaCb9D4imLnqfbESgmSOahREVy1w4Uo1FHX5MYQMc=';
 const space = 'bafyreiesudr3yvac65l3vtyfyu7oesc6cpkr2p5cluqhnhjgvch5shuugy.n5psirv676ui';
 const parentCatalogId = 'bafyreicwlrg4hk75l65qmydrylmqvtllrnm66or36coo7a4upof6qza32i';
+const existingPageId = 'bafyreigjul2jbd5yhkeftrzwr3dnxogpuni2u6hl2jfcye72yck6zmxzj4';
 
 const markdownContent = `# 🐓 Galo Wars — Tamagotchi & Rinha Cibernética
 
@@ -15,7 +16,7 @@ const markdownContent = `# 🐓 Galo Wars — Tamagotchi & Rinha Cibernética
 - **Visibilidade:** Público
 - **Stack Principal:** React 19, TypeScript 5.9, Vite 7, Tailwind CSS v4, DaisyUI v5, Lucide Icons, Canvas-Confetti, Web Audio API
 - **Plataforma de Deploy:** Vercel (Hobby Team \`Gabs' projects\`)
-- **Status:** 🟢 Produção (MVP Entregue)
+- **Status:** 🟢 Produção (MVP Entregue + Sistema Anti-Falência)
 - **Roda no Homelab:** Não (Frontend Web estático / SPA hospedado na Vercel com persistência via LocalStorage)
 
 ---
@@ -36,6 +37,11 @@ O **Galo Wars** combina a nostalgia dos jogos de bichinho virtual (Tamagotchi/Po
 4. **Skin Studio (Desenho na Mão):**
    - Canvas 16x16 pixel art interativo com lápis, balde de tinta, borracha, conta-gotas e paleta retrô.
    - Presets prontos (Clássico, Cyber Neon, Dourado dos Crias) e botão para vestir a arte diretamente no galo.
+5. **Sistema Anti-Falência (Sustentabilidade Financeira):**
+   - **Ciscar Terreiro:** Ação no galinheiro onde o galo cisca a terra e encontra de 12 a 25 $MILHO soltos com efeitos sonoros.
+   - **Bolsa Milho Emergencial:** Banner de socorro com resgate imediato de +75 $MILHO se o saldo cair para < 20 $MILHO (*"Acabou o milho e tem criança chorando!"*).
+   - **Rinha de Treino Amadora:** Opção de aposta 0 (Grátis) na rinha com prêmio base de +25 $MILHO para farmar moedas sem risco.
+   - **Alerta na Navbar:** Badge dinâmico de moedas pulsando em vermelho com *"FALÊNCIA!"* sob saldo crítico.
 
 ---
 
@@ -67,100 +73,23 @@ npm run build
 # Deploy na Vercel
 vercel --prod
 \`\`\`
-
----
-
-### 📂 4. Estrutura de Arquivos
-
-\`\`\`text
-galo-wars/
-├── src/
-│   ├── components/
-│   │   ├── FarmaciaClandestina.tsx  # Loja de bombas e monitor cardíaco
-│   │   ├── GaloGotchi.tsx           # Galinheiro, status vitais e ações
-│   │   ├── GaloVisualizer.tsx       # Renderizador de pixel art em Canvas 2D
-│   │   ├── Navbar.tsx               # Barra superior, saldo $MILHO e abas
-│   │   ├── RinhaArena.tsx           # Octógono de combate e GaloBet
-│   │   └── SkinStudio.tsx           # Editor pixel art 16x16 na mão
-│   ├── hooks/
-│   │   └── useGameState.ts          # State machine e persistência local
-│   ├── types/
-│   │   └── game.ts                  # Tipagens TypeScript do jogo
-│   ├── utils/
-│   │   ├── audio.ts                 # Sintetizador sonoro Web Audio API
-│   │   └── constants.ts             # Sprite padrão 16x16, bombas e oponentes
-│   ├── App.tsx                      # Componente raiz e toasts
-│   ├── index.css                    # Estilos globais e Tailwind v4
-│   └── main.tsx                     # Entrypoint React 19
-├── index.html                       # HTML base com fontes retrô
-├── package.json
-└── vite.config.ts
-\`\`\`
 `;
 
 async function run() {
-  console.log('1. Criando objeto no Anytype...');
-  const res = await fetch('http://192.168.31.60:31009/v1/spaces/' + space + '/objects', {
-    method: 'POST',
+  console.log('Atualizando documentação no Anytype (ID: ' + existingPageId + ')...');
+  const res = await fetch('http://192.168.31.60:31009/v1/spaces/' + space + '/objects/' + existingPageId, {
+    method: 'PATCH',
     headers: {
       'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      type_key: 'page',
-      name: '🐓 Galo Wars — Tamagotchi & Rinha Cibernética',
-      body: markdownContent,
-      properties: [
-        { key: 'created_in_context', objects: [parentCatalogId] }
-      ]
+      markdown: markdownContent
     })
   });
 
-  const data = await res.json();
-  console.log('Create result:', res.status, data);
-
-  const newObjectId = data?.object?.id || data?.id;
-
-  if (newObjectId) {
-    console.log('2. Vinculando à lista do Catálogo de Projetos...');
-    const resList = await fetch('http://192.168.31.60:31009/v1/spaces/' + space + '/lists/' + parentCatalogId + '/objects', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ objects: [newObjectId] })
-    });
-    console.log('Add to list status:', resList.status);
-
-    console.log('3. Atualizando link no documento Pai...');
-    try {
-      const resParent = await fetch('http://192.168.31.60:31009/v1/spaces/' + space + '/objects/' + parentCatalogId, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const parentData = await resParent.json();
-      const parentMarkdown = parentData?.object?.markdown || '';
-
-      const galoLine = '- **[Galo Wars](anytype://object?objectId=' + newObjectId + '&spaceId=' + space + ')** — Simulador de Tamagotchi, rinha de galo cibernética com bombas e apostas no navegador ([Demo na Vercel](https://galo-wars.vercel.app)).\n';
-
-      if (!parentMarkdown.includes('Galo Wars')) {
-        const updatedMarkdown = parentMarkdown + '\n' + galoLine;
-        await fetch('http://192.168.31.60:31009/v1/spaces/' + space + '/objects/' + parentCatalogId, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': 'Bearer ' + token,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ markdown: updatedMarkdown })
-        });
-        console.log('Parent markdown updated with Galo Wars reference!');
-      }
-    } catch (e) {
-      console.warn('Erro ao atualizar parent markdown:', e.message);
-    }
-  }
-
-  console.log('Registro concluído com sucesso!');
+  console.log('Update result status:', res.status);
+  console.log('Documentação atualizada no Anytype com sucesso!');
 }
 
 run().catch(console.error);
