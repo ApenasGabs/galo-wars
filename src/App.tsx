@@ -18,6 +18,8 @@ export default function App() {
     cleanRooster,
     trainRooster,
     restRooster,
+    forageCorn,
+    claimBolsaMilho,
     applyBomba,
     updateSkin,
     renameRooster,
@@ -68,6 +70,8 @@ export default function App() {
             onClean={cleanRooster}
             onTrain={trainRooster}
             onRest={restRooster}
+            onForage={forageCorn}
+            onClaimBolsaMilho={claimBolsaMilho}
             onRename={renameRooster}
             milhoCoins={milhoCoins}
           />

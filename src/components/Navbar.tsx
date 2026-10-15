@@ -62,10 +62,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Saldo de MilhoCoins */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-950/40 border border-amber-600/40 text-amber-300 text-xs shadow-inner">
-            <Coins className="w-4 h-4 text-amber-400" />
+          <div
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs shadow-inner transition-all ${
+              milhoCoins < 20
+                ? 'bg-red-950/80 border-2 border-red-500 text-red-300 animate-pulse'
+                : 'bg-amber-950/40 border border-amber-600/40 text-amber-300'
+            }`}
+          >
+            <Coins className={`w-4 h-4 ${milhoCoins < 20 ? 'text-red-400' : 'text-amber-400'}`} />
             <span className="font-pixel text-[12px]">{milhoCoins.toLocaleString()}</span>
-            <span className="text-[10px] uppercase font-bold text-amber-500">$MILHO</span>
+            <span className="text-[10px] uppercase font-bold text-amber-500">
+              {milhoCoins < 20 ? 'FALÊNCIA!' : '$MILHO'}
+            </span>
           </div>
         </div>
 
