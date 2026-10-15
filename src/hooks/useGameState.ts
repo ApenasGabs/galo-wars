@@ -263,6 +263,43 @@ export function useGameState() {
     });
   }, []);
 
+  // Ciscar o Terreiro (Achar Milho Perdido no chão)
+  const forageCorn = useCallback(() => {
+    if (galo.energy < 5) {
+      showNotification('O galo está sem forças até para ciscar o chão! Deixe-o descansar no poleiro.', 'warning');
+      return;
+    }
+
+    const foundCorn = Math.floor(Math.random() * 14) + 12; // 12 a 25 $MILHO
+    setMilhoCoins(c => c + foundCorn);
+    soundFX.playHit();
+    soundFX.playCoin();
+
+    setGalo(prev => ({
+      ...prev,
+      energy: Math.max(0, prev.energy - 5),
+      hunger: Math.max(0, prev.hunger - 4),
+      happiness: Math.min(100, prev.happiness + 8)
+    }));
+
+    showNotification(`🌾 O galo ciscando o terreiro achou +${foundCorn} $MILHO perdidos na terra!`, 'success');
+  }, [galo.energy, showNotification]);
+
+  // Auxílio Emergencial Bolsa Milho (Anti-falência)
+  const claimBolsaMilho = useCallback(() => {
+    if (milhoCoins >= 20) {
+      showNotification('Você ainda tem milho na carteira! A Bolsa Milho é exclusiva para galinheiros falidos (< 20 $MILHO).', 'warning');
+      return;
+    }
+
+    const aidAmount = 75;
+    setMilhoCoins(c => c + aidAmount);
+    soundFX.playCoin();
+    soundFX.playRooster();
+
+    showNotification('🏛️ BOLSA MILHO RESGATADA! O sindicato dos galos liberou +75 $MILHO! Ninguém chora no terreiro!', 'success');
+  }, [milhoCoins, showNotification]);
+
   // Reiniciar jogo
   const resetGame = useCallback(() => {
     setMilhoCoins(300);
@@ -280,6 +317,8 @@ export function useGameState() {
     cleanRooster,
     trainRooster,
     restRooster,
+    forageCorn,
+    claimBolsaMilho,
     applyBomba,
     updateSkin,
     renameRooster,
@@ -288,3 +327,4 @@ export function useGameState() {
     showNotification
   };
 }
+

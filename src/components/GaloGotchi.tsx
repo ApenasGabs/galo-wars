@@ -11,7 +11,9 @@ import {
   AlertTriangle, 
   Edit3, 
   Trophy, 
-  Skull 
+  Skull,
+  Wheat,
+  Coins
 } from 'lucide-react';
 import type { GaloStats } from '../types/game.ts';
 import { GaloVisualizer } from './GaloVisualizer.tsx';
@@ -22,6 +24,8 @@ interface GaloGotchiProps {
   onClean: () => void;
   onTrain: () => void;
   onRest: () => void;
+  onForage: () => void;
+  onClaimBolsaMilho: () => void;
   onRename: (name: string) => void;
   milhoCoins: number;
 }
@@ -32,6 +36,8 @@ export const GaloGotchi: React.FC<GaloGotchiProps> = ({
   onClean,
   onTrain,
   onRest,
+  onForage,
+  onClaimBolsaMilho,
   onRename,
   milhoCoins
 }) => {
@@ -136,23 +142,55 @@ export const GaloGotchi: React.FC<GaloGotchiProps> = ({
           </div>
         </div>
 
+        {/* Banner de Emergência Anti-Falência: Bolsa Milho */}
+        {milhoCoins < 20 && (
+          <div className="w-full mt-4 p-3.5 rounded-2xl bg-gradient-to-r from-red-950 via-amber-950 to-red-950 border-2 border-red-500 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3 z-10 animate-pulse">
+            <div className="flex items-center gap-3 text-left">
+              <span className="text-3xl">🚨</span>
+              <div>
+                <h4 className="text-xs font-pixel text-red-300">ACABOU O MILHO! (TEM CRIANÇA CHORANDO)</h4>
+                <p className="text-[11px] text-amber-200/90 font-sans-display">
+                  Seu galo está sem fundos! Resgate o auxílio emergencial do sindicato da granja.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClaimBolsaMilho}
+              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-pixel text-[10px] tracking-wider font-bold shadow-lg shadow-amber-950 active:scale-95 whitespace-nowrap cursor-pointer"
+            >
+              🏛️ RESGATAR BOLSA MILHO (+75 $MILHO)
+            </button>
+          </div>
+        )}
+
         {/* Botões de Ações do Tamagotchi */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full mt-4 z-10">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 w-full mt-4 z-10">
           <button
             onClick={onFeed}
             disabled={milhoCoins < 10}
-            className="flex flex-col items-center justify-center p-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed group active:scale-95"
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed group active:scale-95"
           >
-            <Utensils className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+            <Utensils className="w-4 h-4 mb-1 group-hover:scale-110 transition-transform" />
             <span className="text-xs font-bold">Dar Milho</span>
             <span className="text-[10px] text-amber-500/70">10 $MILHO</span>
           </button>
 
           <button
-            onClick={onClean}
-            className="flex flex-col items-center justify-center p-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all group active:scale-95"
+            onClick={onForage}
+            disabled={galo.energy < 5}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed group active:scale-95"
+            title="Ciscar no terreiro para encontrar milho no chão"
           >
-            <Sparkles className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+            <Wheat className="w-4 h-4 mb-1 group-hover:scale-110 transition-transform" />
+            <span className="text-xs font-bold">Ciscar Chão</span>
+            <span className="text-[10px] text-emerald-400/90 font-bold">+15~25 $MILHO</span>
+          </button>
+
+          <button
+            onClick={onClean}
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all group active:scale-95"
+          >
+            <Sparkles className="w-4 h-4 mb-1 group-hover:scale-110 transition-transform" />
             <span className="text-xs font-bold">Banho de Areia</span>
             <span className="text-[10px] text-cyan-500/70">Grátis</span>
           </button>
@@ -160,18 +198,18 @@ export const GaloGotchi: React.FC<GaloGotchiProps> = ({
           <button
             onClick={onTrain}
             disabled={galo.energy < 20 || galo.hunger < 15}
-            className="flex flex-col items-center justify-center p-3 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed group active:scale-95"
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed group active:scale-95"
           >
-            <Dumbbell className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+            <Dumbbell className="w-4 h-4 mb-1 group-hover:scale-110 transition-transform" />
             <span className="text-xs font-bold">Treinar Espora</span>
             <span className="text-[10px] text-orange-500/70">-20 Energia</span>
           </button>
 
           <button
             onClick={onRest}
-            className="flex flex-col items-center justify-center p-3 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition-all group active:scale-95"
+            className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition-all group active:scale-95"
           >
-            <Moon className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+            <Moon className="w-4 h-4 mb-1 group-hover:scale-110 transition-transform" />
             <span className="text-xs font-bold">Descansar</span>
             <span className="text-[10px] text-indigo-500/70">Alivia BPM</span>
           </button>

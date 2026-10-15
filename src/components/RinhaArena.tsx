@@ -30,7 +30,7 @@ export const RinhaArena: React.FC<RinhaArenaProps> = ({
   onBattleEnd
 }) => {
   const [selectedOpponent, setSelectedOpponent] = useState<OpponentGalo>(OPPONENTS[0]);
-  const [betAmount, setBetAmount] = useState<number>(50);
+  const [betAmount, setBetAmount] = useState<number>(() => (milhoCoins >= 50 ? 50 : milhoCoins >= 20 ? 20 : 0));
   const [isFighting, setIsFighting] = useState<boolean>(false);
   const [fightFinished, setFightFinished] = useState<boolean>(false);
   const [winner, setWinner] = useState<'player' | 'opponent' | null>(null);
@@ -89,7 +89,7 @@ export const RinhaArena: React.FC<RinhaArenaProps> = ({
 
   // Iniciar a Rinha!
   const startFight = () => {
-    if (milhoCoins < betAmount) return;
+    if (betAmount > 0 && milhoCoins < betAmount) return;
     if (galo.health < 25) return;
 
     soundFX.playBell();
@@ -205,8 +205,8 @@ export const RinhaArena: React.FC<RinhaArenaProps> = ({
             origin: { y: 0.6 }
           });
 
-          const prize = Math.round(betAmount * selectedOpponent.odds);
-          const netWin = prize - betAmount;
+          const prize = betAmount === 0 ? 25 : Math.round(betAmount * selectedOpponent.odds);
+          const netWin = betAmount === 0 ? 25 : prize - betAmount;
           onBattleEnd(true, netWin, selectedOpponent.reward, false);
           return;
         }
@@ -258,7 +258,7 @@ export const RinhaArena: React.FC<RinhaArenaProps> = ({
     }, 800);
   };
 
-  const potentialWin = Math.round(betAmount * selectedOpponent.odds);
+  const potentialWin = betAmount === 0 ? 25 : Math.round(betAmount * selectedOpponent.odds);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -500,20 +500,22 @@ export const RinhaArena: React.FC<RinhaArenaProps> = ({
               </div>
 
               {/* Botões rápidos de aposta */}
-              <div className="grid grid-cols-4 gap-2">
-                {[20, 50, 100, 250].map(val => (
+              <div className="grid grid-cols-5 gap-1.5">
+                {[0, 20, 50, 100, 250].map(val => (
                   <button
                     key={val}
                     type="button"
-                    disabled={isFighting || milhoCoins < val}
+                    disabled={isFighting || (val > 0 && milhoCoins < val)}
                     onClick={() => setBetAmount(val)}
                     className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
                       betAmount === val
-                        ? 'bg-amber-500 text-slate-950'
+                        ? 'bg-amber-500 text-slate-950 font-bold'
+                        : val === 0
+                        ? 'bg-emerald-950/70 text-emerald-300 border border-emerald-700/60 hover:bg-emerald-900/60'
                         : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
                     } disabled:opacity-30`}
                   >
-                    {val}
+                    {val === 0 ? 'Grátis' : val}
                   </button>
                 ))}
               </div>
@@ -529,11 +531,11 @@ export const RinhaArena: React.FC<RinhaArenaProps> = ({
           {/* Botão de Entrar na Rinha */}
           <button
             onClick={startFight}
-            disabled={isFighting || milhoCoins < betAmount || galo.health < 25}
+            disabled={isFighting || (betAmount > 0 && milhoCoins < betAmount) || galo.health < 25}
             className={`w-full py-4 rounded-2xl font-pixel text-xs tracking-wider flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95 ${
               isFighting
                 ? 'bg-slate-800 text-slate-500 cursor-wait'
-                : milhoCoins < betAmount
+                : (betAmount > 0 && milhoCoins < betAmount)
                 ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
                 : galo.health < 25
                 ? 'bg-red-950 text-red-400 cursor-not-allowed'
@@ -548,7 +550,7 @@ export const RinhaArena: React.FC<RinhaArenaProps> = ({
               'GALO MUITO FERIDO (CUIDE NO GALINHEIRO)'
             ) : (
               <>
-                <Swords className="w-4 h-4" /> APOSTAR & LUTAR!
+                <Swords className="w-4 h-4" /> {betAmount === 0 ? 'LUTAR GRÁTIS (TREINO)' : 'APOSTAR & LUTAR!'}
               </>
             )}
           </button>
